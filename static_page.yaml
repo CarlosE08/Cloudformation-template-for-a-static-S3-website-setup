@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create an S3 static website
+
+Resources:
+  StaticWebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: s3-carlos-prueba-x  # Actualizar con el nombre deseado del bucket
+      WebsiteConfiguration: 
+        IndexDocument: index.html  # Actualizar con el nombre deseado del archivo index
+        ErrorDocument: error.html  # Actualizar con el nombre deseado del archivo de error
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false 
+        RestrictPublicBuckets: false
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StaticWebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub arn:aws:s3:::${StaticWebsiteBucket}/*
+
+Outputs:
+  S3BucketEndpoint:
+    Value: !GetAtt StaticWebsiteBucket.WebsiteURL
+    Description: URL of the static website hosted on S3
+
+# Levantar el recurso con el siguiente comando:
+# aws cloudformation deploy --stack-name stack-carlos-prueba-s3 --template-file static_page.yaml --region us-east-1 --profile 'Nombre_del_perfil'
